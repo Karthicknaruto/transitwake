@@ -1,25 +1,50 @@
 {
   "expo": {
-    "name": "temp-app",
-    "slug": "temp-app",
+    "name": "TransitWake - 4km Stop Alarm",
+    "slug": "transit-wake-alarm",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.transitwake.geoalarm",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "TransitWake monitors your route to sound the wake-up alarm before your stop.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "TransitWake tracks your transit route in the background so you wake up before your stop even with your phone locked.",
+        "UIBackgroundModes": [
+          "location",
+          "audio",
+          "fetch"
+        ]
+      }
     },
     "android": {
+      "package": "com.transitwake.geoalarm",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0F172A",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION",
+        "FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "VIBRATE",
+        "WAKE_LOCK",
+        "SYSTEM_ALERT_WINDOW",
+        "POST_NOTIFICATIONS",
+        "USE_EXACT_ALARM"
+      ],
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
     }
   }
 }
