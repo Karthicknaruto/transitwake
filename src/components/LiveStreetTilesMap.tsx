@@ -151,10 +151,10 @@ export const LiveStreetTilesMap: React.FC<LiveStreetTilesMapProps> = ({
       attributionControl: false
     }).setView([curDestLat, curDestLon], 12);
 
-    // OpenStreetMap / Carto Voyager modern street tile layer
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    // OpenStreetMap modern street tile layer (100% free, zero API key required)
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      subdomains: 'abcd'
+      attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
     // Destination Pin Marker

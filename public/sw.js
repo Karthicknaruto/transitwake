@@ -1,7 +1,7 @@
 // TransitWake Subway Tunnel Service Worker
 // Enables 100% offline map tiles and station navigation in underground metro deadzones
 
-const CACHE_NAME = 'transitwake-subway-tunnel-v1';
+const CACHE_NAME = 'transitwake-subway-tunnel-v2';
 const PRECACHE_URLS = ['/', '/index.html', '/favicon.ico'];
 
 self.addEventListener('install', (event) => {
