@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import { CommutePreset } from '../types/routes';
+import { CommutePreset, TransferInterchange } from '../types/routes';
 
 class RouteManager {
   private presets: CommutePreset[] = [];
@@ -23,6 +23,27 @@ class RouteManager {
         radiusKm: 4.0,
         direction: 'OUTBOUND',
         lastUsedAt: Date.now(),
+        transfer: {
+          name: 'MG Road Interchange',
+          coords: { latitude: 12.9756, longitude: 77.6066 },
+          wakeRadiusKm: 2.0,
+        },
+      },
+      {
+        id: 'mumbai_local',
+        name: 'Western Line Local',
+        originName: 'Borivali Station',
+        originCoords: { latitude: 19.2290, longitude: 72.8573 },
+        destinationName: 'Churchgate Terminal',
+        destinationCoords: { latitude: 18.9322, longitude: 72.8264 },
+        radiusKm: 4.0,
+        direction: 'OUTBOUND',
+        lastUsedAt: Date.now() - 3600000,
+        transfer: {
+          name: 'Dadar Junction Interchange',
+          coords: { latitude: 19.0178, longitude: 72.8478 },
+          wakeRadiusKm: 2.0,
+        },
       },
     ];
   }
@@ -82,11 +103,27 @@ class RouteManager {
       destinationCoords: { ...current.originCoords },
       direction: current.direction === 'OUTBOUND' ? 'RETURN' : 'OUTBOUND',
       lastUsedAt: Date.now(),
+      transfer: current.transfer ? { ...current.transfer } : undefined,
     };
 
     this.presets = this.presets.map((p) => (p.id === current.id ? flipped : p));
     this.persistPresets();
     return { ...flipped };
+  }
+
+  public setTransferInterchange(presetId: string, transfer?: TransferInterchange): CommutePreset | null {
+    const target = this.presets.find((p) => p.id === presetId);
+    if (!target) return null;
+
+    const updated: CommutePreset = {
+      ...target,
+      transfer,
+      lastUsedAt: Date.now(),
+    };
+
+    this.presets = this.presets.map((p) => (p.id === presetId ? updated : p));
+    this.persistPresets();
+    return { ...updated };
   }
 
   public createPreset(data: Omit<CommutePreset, 'id' | 'direction' | 'lastUsedAt'>): CommutePreset {

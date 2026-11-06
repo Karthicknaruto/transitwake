@@ -2,10 +2,13 @@ import {
   PrimeSubscriptionState,
   PurchaseResult,
   SubscriptionPlanDetails,
+  StudentReferralState,
 } from '../types/subscription';
 
 const STORAGE_KEY = 'transitwake_prime_subscription_v2';
+const REFERRAL_STORAGE_KEY = 'transitwake_student_referrals_v1';
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+const ONE_HUNDRED_EIGHTY_DAYS_MS = 180 * 24 * 60 * 60 * 1000;
 
 const DEFAULT_STATE: PrimeSubscriptionState = {
   tier: 'free',
@@ -20,10 +23,20 @@ const DEFAULT_STATE: PrimeSubscriptionState = {
   transactionId: null,
 };
 
+const DEFAULT_REFERRAL_STATE: StudentReferralState = {
+  myReferralCode: 'TW-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
+  redeemedCount: 0,
+  requiredForUnlock: 2,
+  semesterPassUnlocked: false,
+  semesterPassExpiresAt: null,
+  history: [],
+};
+
 type SubscriptionListener = (state: PrimeSubscriptionState) => void;
 
 class SubscriptionService {
   private state: PrimeSubscriptionState = { ...DEFAULT_STATE };
+  private referralState: StudentReferralState = { ...DEFAULT_REFERRAL_STATE };
   private listeners: Set<SubscriptionListener> = new Set();
   private initialized: boolean = false;
 
@@ -38,8 +51,11 @@ class SubscriptionService {
         if (stored) {
           const parsed: PrimeSubscriptionState = JSON.parse(stored);
           this.state = this.evaluateExpiration(parsed);
-          this.initialized = true;
-          return;
+        }
+
+        const storedReferral = window.localStorage.getItem(REFERRAL_STORAGE_KEY);
+        if (storedReferral) {
+          this.referralState = JSON.parse(storedReferral);
         }
       }
     } catch {
@@ -52,6 +68,7 @@ class SubscriptionService {
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
+        window.localStorage.setItem(REFERRAL_STORAGE_KEY, JSON.stringify(this.referralState));
       }
     } catch {
       // Memory fallback
@@ -83,6 +100,10 @@ class SubscriptionService {
   public getState(): PrimeSubscriptionState {
     this.state = this.evaluateExpiration(this.state);
     return { ...this.state };
+  }
+
+  public getReferralState(): StudentReferralState {
+    return { ...this.referralState };
   }
 
   public isAdFree(): boolean {
@@ -155,11 +176,83 @@ class SubscriptionService {
     };
   }
 
+  /**
+   * Redeems a classmate's invite code to unlock the student referral pass.
+   */
+  public async redeemReferralCode(code: string): Promise<{ success: boolean; message: string }> {
+    const normalized = code.trim().toUpperCase();
+    if (!normalized || normalized.length < 4) {
+      return { success: false, message: 'Please enter a valid invite code.' };
+    }
+
+    if (normalized === this.referralState.myReferralCode) {
+      return { success: false, message: 'You cannot use your own referral code.' };
+    }
+
+    if (this.referralState.history.includes(normalized)) {
+      return { success: false, message: 'This code has already been redeemed on this device.' };
+    }
+
+    const nextCount = this.referralState.redeemedCount + 1;
+    const history = [...this.referralState.history, normalized];
+
+    let unlocked = this.referralState.semesterPassUnlocked;
+    let expiresAt = this.referralState.semesterPassExpiresAt;
+
+    if (nextCount >= this.referralState.requiredForUnlock) {
+      unlocked = true;
+      const now = Date.now();
+      expiresAt = now + ONE_HUNDRED_EIGHTY_DAYS_MS;
+
+      // Activate Prime for 180 days
+      this.state = {
+        tier: 'prime',
+        status: 'active',
+        productId: 'transitwake_student_semester_free',
+        priceInr: 0,
+        currency: 'INR',
+        billingPeriod: 'monthly',
+        subscribedAt: now,
+        expiresAt,
+        autoRenew: false,
+        transactionId: `referral_${now}`,
+      };
+    }
+
+    this.referralState = {
+      ...this.referralState,
+      redeemedCount: nextCount,
+      history,
+      semesterPassUnlocked: unlocked,
+      semesterPassExpiresAt: expiresAt,
+    };
+
+    this.persistState();
+
+    if (unlocked) {
+      return {
+        success: true,
+        message: 'Student pass unlocked. 6 months of ad-free TransitWake Prime activated.',
+      };
+    }
+
+    return {
+      success: true,
+      message: `Referral registered (1 of 2). Invite one more classmate to unlock your free semester pass.`,
+    };
+  }
+
   public async wipeData(): Promise<void> {
     this.state = { ...DEFAULT_STATE };
+    this.referralState = {
+      ...DEFAULT_REFERRAL_STATE,
+      myReferralCode: 'TW-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
+    };
+
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
         window.localStorage.removeItem(STORAGE_KEY);
+        window.localStorage.removeItem(REFERRAL_STORAGE_KEY);
       }
     } catch {
       // Memory fallback
@@ -174,12 +267,13 @@ class SubscriptionService {
       priceFormatted: '₹26/month',
       priceInr: 26,
       period: 'Monthly',
-      description: 'Ad-free transit experience with priority updates and instant geofence alerts.',
+      description: 'Ad-free transit experience with multi-leg transfer alarms and live WhatsApp status sharing.',
       features: [
         'Complete ad removal (zero banner and interstitial ads)',
+        'Multi-leg intermediate interchange transfer alarms',
+        '1-tap WhatsApp peace of mind live arrival link',
         'Full 14-day statutory refund guarantee',
         'Transparent 1-tap cancellation with no exit barriers',
-        'Directly supports independent transit software',
       ],
       refundTerms: '14-day refund window honored via store support or direct contact.',
     };

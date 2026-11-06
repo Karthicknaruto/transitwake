@@ -1,20 +1,50 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { CommutePreset } from '../types/routes';
+import { CommutePreset, TransferInterchange } from '../types/routes';
 import { routeManager } from '../services/routeManager';
+import { subscriptionService } from '../services/subscriptionService';
 
 interface RouteFlipBarProps {
   onRouteSelected: (preset: CommutePreset) => void;
+  onOpenPrime?: () => void;
 }
 
-export const RouteFlipBar: React.FC<RouteFlipBarProps> = ({ onRouteSelected }) => {
+export const RouteFlipBar: React.FC<RouteFlipBarProps> = ({ onRouteSelected, onOpenPrime }) => {
   const activePreset = routeManager.getActivePreset();
 
   if (!activePreset) return null;
 
+  const transferEnabled = !!activePreset.transfer;
+
   const handleFlip = () => {
     const flipped = routeManager.flipCurrentRoute();
     onRouteSelected(flipped);
+  };
+
+  const handleToggleTransfer = () => {
+    const isPrime = subscriptionService.isAdFree();
+    if (!isPrime && !transferEnabled) {
+      if (onOpenPrime) {
+        onOpenPrime();
+      }
+      return;
+    }
+
+    if (transferEnabled) {
+      const updated = routeManager.setTransferInterchange(activePreset.id, undefined);
+      if (updated) onRouteSelected(updated);
+    } else {
+      const defaultTransfer: TransferInterchange = {
+        name: activePreset.direction === 'OUTBOUND' ? 'Central Interchange' : 'City Junction',
+        coords: {
+          latitude: (activePreset.originCoords.latitude + activePreset.destinationCoords.latitude) / 2,
+          longitude: (activePreset.originCoords.longitude + activePreset.destinationCoords.longitude) / 2,
+        },
+        wakeRadiusKm: 2.0,
+      };
+      const updated = routeManager.setTransferInterchange(activePreset.id, defaultTransfer);
+      if (updated) onRouteSelected(updated);
+    }
   };
 
   return (
@@ -41,24 +71,61 @@ export const RouteFlipBar: React.FC<RouteFlipBarProps> = ({ onRouteSelected }) =
         </TouchableOpacity>
       </View>
 
+      {/* Sequential Route Display */}
       <View style={styles.stopsRow}>
         <View style={styles.stopCol}>
-          <Text style={styles.stopLabel}>From</Text>
+          <Text style={styles.stopLabel}>Origin</Text>
           <Text style={styles.stopName} numberOfLines={1}>
             {activePreset.originName}
           </Text>
         </View>
+
+        {activePreset.transfer && (
+          <>
+            <View style={styles.arrowCol}>
+              <Text style={styles.arrowGlyph}>→</Text>
+            </View>
+            <View style={styles.stopCol}>
+              <View style={styles.transferLabelRow}>
+                <Text style={styles.stopLabel}>Transfer hub</Text>
+                <View style={styles.transferPrimeTag}>
+                  <Text style={styles.transferPrimeTagText}>2 km</Text>
+                </View>
+              </View>
+              <Text style={styles.transferStopName} numberOfLines={1}>
+                {activePreset.transfer.name}
+              </Text>
+            </View>
+          </>
+        )}
 
         <View style={styles.arrowCol}>
           <Text style={styles.arrowGlyph}>→</Text>
         </View>
 
         <View style={styles.stopCol}>
-          <Text style={styles.stopLabel}>To (Alarm target)</Text>
+          <Text style={styles.stopLabel}>Final stop</Text>
           <Text style={styles.stopNameTarget} numberOfLines={1}>
             {activePreset.destinationName}
           </Text>
         </View>
+      </View>
+
+      {/* Multi-Leg Transfer Station Toggle */}
+      <View style={styles.transferToggleRow}>
+        <TouchableOpacity
+          style={[styles.transferBtn, activePreset.transfer && styles.transferBtnActive]}
+          onPress={handleToggleTransfer}
+          accessibilityRole="button"
+          accessibilityLabel="Toggle intermediate interchange transfer alarm"
+        >
+          <View style={[styles.transferDot, activePreset.transfer && styles.transferDotActive]} />
+          <Text style={[styles.transferBtnText, activePreset.transfer && styles.transferBtnTextActive]}>
+            {activePreset.transfer
+              ? `Interchange alarm: ${activePreset.transfer.name} (2.0 km)`
+              : 'Add transfer interchange stop (Prime)'}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -132,18 +199,19 @@ const styles = StyleSheet.create({
     padding: 8,
     borderWidth: 1,
     borderColor: '#E2E8F0',
+    marginBottom: 8,
   },
   stopCol: {
     flex: 1,
   },
   arrowCol: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 6,
     alignItems: 'center',
     justifyContent: 'center',
   },
   arrowGlyph: {
     color: '#64748B',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '500',
   },
   stopLabel: {
@@ -152,14 +220,71 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginBottom: 1,
   },
+  transferLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  transferPrimeTag: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 4,
+    borderRadius: 3,
+  },
+  transferPrimeTagText: {
+    color: '#B45309',
+    fontSize: 8.5,
+    fontWeight: '700',
+  },
   stopName: {
     color: '#475569',
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '500',
+  },
+  transferStopName: {
+    color: '#B45309',
+    fontSize: 11.5,
+    fontWeight: '600',
   },
   stopNameTarget: {
     color: '#0F172A',
-    fontSize: 12,
+    fontSize: 11.5,
+    fontWeight: '600',
+  },
+  transferToggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+  },
+  transferBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F1F5F9',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  transferBtnActive: {
+    backgroundColor: '#FFFBEB',
+    borderColor: '#FDE68A',
+  },
+  transferDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#94A3B8',
+    marginRight: 6,
+  },
+  transferDotActive: {
+    backgroundColor: '#F59E0B',
+  },
+  transferBtnText: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#475569',
+  },
+  transferBtnTextActive: {
+    color: '#92400E',
     fontWeight: '600',
   },
 });

@@ -19,6 +19,15 @@ export interface PrimeSubscriptionState {
   transactionId: string | null;
 }
 
+export interface StudentReferralState {
+  myReferralCode: string;
+  redeemedCount: number;
+  requiredForUnlock: number;
+  semesterPassUnlocked: boolean;
+  semesterPassExpiresAt: number | null;
+  history: string[];
+}
+
 export interface PurchaseResult {
   success: boolean;
   error?: string;

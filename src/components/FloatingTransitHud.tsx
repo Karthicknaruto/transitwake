@@ -6,9 +6,10 @@ import {
   TouchableOpacity,
   PanResponder,
   Animated,
-  Dimensions,
+  Linking,
 } from 'react-native';
 import { formatDistance } from '../utils/geo';
+import { generateWhatsAppEtaUrl } from '../utils/routeSync';
 
 interface FloatingTransitHudProps {
   destinationName: string;
@@ -52,6 +53,17 @@ export const FloatingTransitHud: React.FC<FloatingTransitHudProps> = ({
       },
     })
   ).current;
+
+  const handleShareWhatsApp = () => {
+    const url = generateWhatsAppEtaUrl({
+      destinationName,
+      distanceKm,
+      etaMinutes,
+      speedKmh,
+      radiusKm,
+    });
+    Linking.openURL(url).catch(() => {});
+  };
 
   return (
     <Animated.View
@@ -121,6 +133,17 @@ export const FloatingTransitHud: React.FC<FloatingTransitHudProps> = ({
               <Text style={styles.metricValue}>{radiusKm.toFixed(1)} km</Text>
             </View>
           </View>
+
+          {/* 1-Tap WhatsApp Live ETA Share */}
+          <TouchableOpacity
+            style={styles.whatsAppShareBtn}
+            onPress={handleShareWhatsApp}
+            accessibilityRole="button"
+            accessibilityLabel="Share live arrival status on WhatsApp"
+          >
+            <View style={styles.whatsAppDot} />
+            <Text style={styles.whatsAppBtnText}>Share live ETA on WhatsApp</Text>
+          </TouchableOpacity>
 
           {isAlarmTriggered && (
             <View style={styles.alarmActionRow}>
@@ -206,117 +229,137 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   pillEtaText: {
-    color: '#94A3B8',
-    fontSize: 11,
-    fontWeight: '500',
-    fontVariant: ['tabular-nums'],
+    color: '#FC8019',
+    fontSize: 12,
+    fontWeight: '700',
   },
   expandedCard: {
-    width: 250,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    padding: 12,
+    backgroundColor: '#0F172A',
+    borderRadius: 16,
+    padding: 16,
+    width: 280,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#334155',
     shadowColor: '#000000',
-    shadowOpacity: 0.15,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
   },
   expandedHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
-    marginRight: 6,
+    marginRight: 8,
   },
   expandedTitle: {
-    color: '#0F172A',
-    fontSize: 12.5,
-    fontWeight: '600',
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
   },
   collapseBtn: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    backgroundColor: '#F1F5F9',
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#1E293B',
     alignItems: 'center',
     justifyContent: 'center',
   },
   collapseBtnText: {
-    color: '#475569',
-    fontSize: 14,
-    fontWeight: '600',
-    lineHeight: 16,
+    color: '#94A3B8',
+    fontSize: 16,
+    fontWeight: '700',
+    lineHeight: 18,
   },
   metricsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 8,
-    padding: 8,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    backgroundColor: '#1E293B',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 12,
   },
   metricItem: {
     alignItems: 'center',
   },
   metricLabel: {
-    color: '#64748B',
-    fontSize: 9,
-    fontWeight: '500',
+    color: '#94A3B8',
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
     marginBottom: 2,
   },
   metricValue: {
-    color: '#0F172A',
-    fontSize: 11,
-    fontWeight: '600',
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
     fontVariant: ['tabular-nums'],
+  },
+  whatsAppShareBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#1E293B',
+    borderWidth: 1,
+    borderColor: '#059669',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginBottom: 10,
+  },
+  whatsAppDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: '#10B981',
+    marginRight: 8,
+  },
+  whatsAppBtnText: {
+    color: '#34D399',
+    fontSize: 12,
+    fontWeight: '600',
   },
   alarmActionRow: {
     flexDirection: 'row',
-    gap: 6,
-    marginBottom: 6,
+    gap: 8,
+    marginBottom: 10,
   },
   dismissBtn: {
     flex: 1,
     backgroundColor: '#DC2626',
-    paddingVertical: 7,
-    borderRadius: 6,
+    borderRadius: 8,
+    paddingVertical: 8,
     alignItems: 'center',
   },
   dismissBtnText: {
     color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '700',
   },
   snoozeBtn: {
     flex: 1,
-    backgroundColor: '#F1F5F9',
-    paddingVertical: 7,
-    borderRadius: 6,
+    backgroundColor: '#334155',
+    borderRadius: 8,
+    paddingVertical: 8,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
   },
   snoozeBtnText: {
-    color: '#0F172A',
-    fontSize: 11,
+    color: '#CBD5E1',
+    fontSize: 12,
     fontWeight: '600',
   },
   closeOverlayBtn: {
     alignItems: 'center',
-    paddingVertical: 2,
+    paddingVertical: 4,
   },
   closeOverlayText: {
     color: '#64748B',
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '500',
   },
 });

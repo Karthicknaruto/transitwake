@@ -7,9 +7,11 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  TextInput,
+  Linking,
 } from 'react-native';
 import { subscriptionService } from '../services/subscriptionService';
-import { PrimeSubscriptionState } from '../types/subscription';
+import { PrimeSubscriptionState, StudentReferralState } from '../types/subscription';
 
 interface PrimeModalProps {
   visible: boolean;
@@ -18,12 +20,15 @@ interface PrimeModalProps {
 
 export const PrimeModal: React.FC<PrimeModalProps> = ({ visible, onClose }) => {
   const [state, setState] = useState<PrimeSubscriptionState>(() => subscriptionService.getState());
+  const [referralState, setReferralState] = useState<StudentReferralState>(() => subscriptionService.getReferralState());
   const [loading, setLoading] = useState<boolean>(false);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const [inputCode, setInputCode] = useState<string>('');
 
   useEffect(() => {
     return subscriptionService.subscribe((updated) => {
       setState(updated);
+      setReferralState(subscriptionService.getReferralState());
     });
   }, []);
 
@@ -31,6 +36,7 @@ export const PrimeModal: React.FC<PrimeModalProps> = ({ visible, onClose }) => {
     if (visible) {
       setFeedbackMessage(null);
       setState(subscriptionService.getState());
+      setReferralState(subscriptionService.getReferralState());
     }
   }, [visible]);
 
@@ -74,6 +80,8 @@ export const PrimeModal: React.FC<PrimeModalProps> = ({ visible, onClose }) => {
           `Subscription cancelled. You retain ad-free access until ${formatDate(state.expiresAt)}.`
         );
       }
+    } catch {
+      setFeedbackMessage('Failed to cancel subscription. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -89,6 +97,31 @@ export const PrimeModal: React.FC<PrimeModalProps> = ({ visible, onClose }) => {
       } else {
         setFeedbackMessage('No active subscription found to restore.');
       }
+    } catch {
+      setFeedbackMessage('Failed to restore purchases. Please check your connection and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleShareReferral = () => {
+    const text = `Hey, use TransitWake for your train commute. Set alarms that wake you before your stop: https://transitwake.app/invite?code=${referralState.myReferralCode}`;
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    Linking.openURL(url).catch(() => {});
+  };
+
+  const handleRedeemCode = async () => {
+    if (!inputCode.trim()) return;
+    setLoading(true);
+    try {
+      const res = await subscriptionService.redeemReferralCode(inputCode);
+      setFeedbackMessage(res.message);
+      if (res.success) {
+        setInputCode('');
+        setReferralState(subscriptionService.getReferralState());
+      }
+    } catch {
+      setFeedbackMessage('Failed to redeem invite code. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -112,7 +145,7 @@ export const PrimeModal: React.FC<PrimeModalProps> = ({ visible, onClose }) => {
           <View style={styles.header}>
             <View>
               <Text style={styles.title}>TransitWake Prime</Text>
-              <Text style={styles.subtitle}>Ad-free transit experience</Text>
+              <Text style={styles.subtitle}>The commuter sleep sanctuary</Text>
             </View>
             <TouchableOpacity
               style={styles.closeButton}
@@ -161,9 +194,9 @@ export const PrimeModal: React.FC<PrimeModalProps> = ({ visible, onClose }) => {
                   <View style={styles.checkInner} />
                 </View>
                 <View style={styles.featureTextColumn}>
-                  <Text style={styles.featureTitle}>Zero banner advertisements</Text>
+                  <Text style={styles.featureTitle}>Multi-leg interchange transfer alarms</Text>
                   <Text style={styles.featureDescription}>
-                    Removes the persistent sponsored banner from all navigation screens.
+                    Wakes you 2 km before your intermediate junction, then auto-arms for your final stop.
                   </Text>
                 </View>
               </View>
@@ -173,9 +206,21 @@ export const PrimeModal: React.FC<PrimeModalProps> = ({ visible, onClose }) => {
                   <View style={styles.checkInner} />
                 </View>
                 <View style={styles.featureTextColumn}>
-                  <Text style={styles.featureTitle}>Zero route-start interstitial popups</Text>
+                  <Text style={styles.featureTitle}>1-tap WhatsApp live arrival sharing</Text>
                   <Text style={styles.featureDescription}>
-                    Start tracking and simulation instantly with zero ad interruption.
+                    Send real-time read-only route updates to your family so they know you are safe.
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.featureItem}>
+                <View style={styles.checkCircle}>
+                  <View style={styles.checkInner} />
+                </View>
+                <View style={styles.featureTextColumn}>
+                  <Text style={styles.featureTitle}>Zero banner or popup advertisements</Text>
+                  <Text style={styles.featureDescription}>
+                    Clean, calm cockpit with zero ads during tracking or route activation.
                   </Text>
                 </View>
               </View>
@@ -187,29 +232,66 @@ export const PrimeModal: React.FC<PrimeModalProps> = ({ visible, onClose }) => {
                 <View style={styles.featureTextColumn}>
                   <Text style={styles.featureTitle}>14-day statutory refund guarantee</Text>
                   <Text style={styles.featureDescription}>
-                    Honored via Apple App Store, Google Play Store, or direct support.
+                    Full refund honored with zero friction if you are dissatisfied for any reason.
                   </Text>
                 </View>
+              </View>
+            </View>
+
+            {/* Student & Campus Referral Pass Unlock */}
+            <View style={styles.referralCard}>
+              <View style={styles.referralHeader}>
+                <Text style={styles.referralTag}>Student referral loop</Text>
+                <Text style={styles.referralStatus}>
+                  {referralState.semesterPassUnlocked
+                    ? 'Unlocked (6 months free)'
+                    : `${referralState.redeemedCount} of 2 invited`}
+                </Text>
+              </View>
+              <Text style={styles.referralDescription}>
+                Invite two commuting classmates to unlock 6 months of ad-free Prime without paying.
+              </Text>
+              
+              <View style={styles.referralCodeBox}>
+                <Text style={styles.codeLabel}>Your invite code:</Text>
+                <Text style={styles.codeValue}>{referralState.myReferralCode}</Text>
+                <TouchableOpacity
+                  style={styles.shareCodeBtn}
+                  onPress={handleShareReferral}
+                  accessibilityRole="button"
+                  accessibilityLabel="Share invite code on WhatsApp"
+                >
+                  <Text style={styles.shareCodeBtnText}>Share on WhatsApp</Text>
+                </TouchableOpacity>
               </View>
 
-              <View style={styles.featureItem}>
-                <View style={styles.checkCircle}>
-                  <View style={styles.checkInner} />
+              {!referralState.semesterPassUnlocked && (
+                <View style={styles.redeemRow}>
+                  <TextInput
+                    style={styles.redeemInput}
+                    placeholder="Enter classmate's code"
+                    placeholderTextColor="#94A3B8"
+                    value={inputCode}
+                    onChangeText={setInputCode}
+                    autoCapitalize="characters"
+                  />
+                  <TouchableOpacity
+                    style={styles.redeemBtn}
+                    onPress={handleRedeemCode}
+                    accessibilityRole="button"
+                    accessibilityLabel="Redeem invite code"
+                  >
+                    <Text style={styles.redeemBtnText}>Redeem</Text>
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.featureTextColumn}>
-                  <Text style={styles.featureTitle}>Cancel anytime with one tap</Text>
-                  <Text style={styles.featureDescription}>
-                    No dark patterns or cancellation hurdles. Retain paid days until billing ends.
-                  </Text>
-                </View>
-              </View>
+              )}
             </View>
 
             {/* Regulatory Disclosures Box (Store compliance Point 3 & 10) */}
             <View style={styles.disclosureBox}>
               <Text style={styles.disclosureTitle}>Billing transparency and fair terms</Text>
               <Text style={styles.disclosureText}>
-                TransitWake core features (station search, geofence alarms, and navigation) remain 100% free forever. Prime is an optional ad removal upgrade billed at ₹26 per month (taxes included). Subscriptions renew automatically every 30 days unless cancelled at least 24 hours prior to the renewal date.
+                TransitWake core navigation remains free forever. Prime is an optional upgrade billed at ₹26 per month (taxes included). Subscriptions renew automatically every 30 days unless cancelled at least 24 hours prior to the renewal date.
               </Text>
             </View>
 
@@ -418,6 +500,98 @@ const styles = StyleSheet.create({
     color: '#64748B',
     marginTop: 2,
     lineHeight: 16,
+  },
+  referralCard: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 14,
+    marginBottom: 16,
+  },
+  referralHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  referralTag: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#059669',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  referralStatus: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#0F172A',
+  },
+  referralDescription: {
+    fontSize: 12,
+    color: '#64748B',
+    lineHeight: 16,
+    marginBottom: 12,
+  },
+  referralCodeBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 10,
+  },
+  codeLabel: {
+    fontSize: 11,
+    color: '#64748B',
+    marginRight: 6,
+  },
+  codeValue: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#0F172A',
+    flex: 1,
+  },
+  shareCodeBtn: {
+    backgroundColor: '#0F172A',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  shareCodeBtnText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  redeemRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  redeemInput: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    fontSize: 12,
+    color: '#0F172A',
+  },
+  redeemBtn: {
+    backgroundColor: '#FC8019',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  redeemBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
   },
   disclosureBox: {
     backgroundColor: '#F8FAFC',

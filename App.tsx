@@ -6,10 +6,13 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Alert,
+  Linking,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 
 import { Coordinates, AlarmStatus, UserProfile, CommutePreset } from './src/types';
+import { TransferInterchange } from './src/types/routes';
+import { generateWhatsAppEtaUrl, RouteSyncPayload } from './src/utils/routeSync';
 import {
   haversineDistance,
   isAlarmTriggered,
@@ -61,6 +64,13 @@ export default function App() {
   const [radiusKm, setRadiusKm] = useState<number>(4.0);
   const [speedKmh, setSpeedKmh] = useState<number | null>(45);
 
+  // Multi-Leg Transfer Interchange State
+  const [transferStation, setTransferStation] = useState<TransferInterchange | undefined>(() => {
+    const active = routeManager.getActivePreset();
+    return active?.transfer;
+  });
+  const [transferAlertTriggered, setTransferAlertTriggered] = useState<boolean>(false);
+
   // Authentication & Profile State
   const [user, setUser] = useState<UserProfile>(authService.getCurrentUser());
 
@@ -110,6 +120,12 @@ export default function App() {
       ? haversineDistance(currentLocation, destination)
       : null;
 
+  // Calculate live distance to intermediate transfer interchange
+  const transferDistanceKm =
+    currentLocation && transferStation
+      ? haversineDistance(currentLocation, transferStation.coords)
+      : null;
+
   // Power tier computation
   const powerTier = powerManager.computeTier(currentDistanceKm || 0, speedKmh || 0);
 
@@ -153,26 +169,52 @@ export default function App() {
 
   // Monitor proximity for arrival alarms and speech callouts
   useEffect(() => {
-    if (alarmStatus === 'TRACKING' && currentDistanceKm !== null) {
-      // Audio speech milestone checks (10km, 5km, arrival zone, 1km)
-      speechService.checkMilestoneAndSpeak({
-        destinationName,
-        distanceKm: currentDistanceKm,
-        radiusKm,
-      });
-
-      // Arrival trigger check
-      if (isAlarmTriggered(currentDistanceKm, radiusKm)) {
-        setAlarmStatus('TRIGGERED');
+    if (alarmStatus === 'TRACKING') {
+      // 1. Multi-Leg Interchange Transfer Alert check
+      if (
+        transferStation &&
+        !transferAlertTriggered &&
+        transferDistanceKm !== null &&
+        transferDistanceKm <= transferStation.wakeRadiusKm
+      ) {
+        setTransferAlertTriggered(true);
         notificationService.triggerArrivalAlert({
-          destinationName,
-          distanceKm: currentDistanceKm,
-          etaMinutes: estimateETA(currentDistanceKm, speedKmh),
-          radiusKm,
+          destinationName: `Interchange: ${transferStation.name}`,
+          distanceKm: transferDistanceKm,
+          etaMinutes: estimateETA(transferDistanceKm, speedKmh),
+          radiusKm: transferStation.wakeRadiusKm,
         });
       }
+
+      // 2. Final destination arrival check
+      if (currentDistanceKm !== null) {
+        speechService.checkMilestoneAndSpeak({
+          destinationName,
+          distanceKm: currentDistanceKm,
+          radiusKm,
+        });
+
+        if (isAlarmTriggered(currentDistanceKm, radiusKm)) {
+          setAlarmStatus('TRIGGERED');
+          notificationService.triggerArrivalAlert({
+            destinationName,
+            distanceKm: currentDistanceKm,
+            etaMinutes: estimateETA(currentDistanceKm, speedKmh),
+            radiusKm,
+          });
+        }
+      }
     }
-  }, [currentDistanceKm, alarmStatus, radiusKm, destinationName, speedKmh]);
+  }, [
+    currentDistanceKm,
+    transferDistanceKm,
+    alarmStatus,
+    radiusKm,
+    destinationName,
+    speedKmh,
+    transferStation,
+    transferAlertTriggered,
+  ]);
 
   // Handle Search Result
   const handleSelectPlace = (place: any) => {
@@ -197,7 +239,34 @@ export default function App() {
     setDestinationName(preset.destinationName);
     setCurrentLocation(preset.originCoords);
     setRadiusKm(preset.radiusKm);
+    setTransferStation(preset.transfer);
+    setTransferAlertTriggered(false);
     speechService.resetMilestones();
+  };
+
+  // Handle Desktop Route Sync
+  const handleSyncRoute = (payload: RouteSyncPayload) => {
+    setDestination(payload.destination);
+    setDestinationName(payload.destinationName);
+    setRadiusKm(payload.radiusKm);
+    if (payload.origin) {
+      setCurrentLocation(payload.origin);
+    }
+    setTransferStation(payload.transfer);
+    setTransferAlertTriggered(false);
+    speechService.resetMilestones();
+  };
+
+  // Handle 1-Tap WhatsApp "Peace of Mind" Arrival Share
+  const handleShareWhatsApp = () => {
+    const url = generateWhatsAppEtaUrl({
+      destinationName,
+      distanceKm: currentDistanceKm,
+      etaMinutes: estimateETA(currentDistanceKm || 0, speedKmh),
+      speedKmh,
+      radiusKm,
+    });
+    Linking.openURL(url).catch(() => {});
   };
 
   // Start Real GPS Alarm Tracking
@@ -329,6 +398,8 @@ export default function App() {
     handleStopTracking();
     setDestination(null);
     setDestinationName('');
+    setTransferStation(undefined);
+    setTransferAlertTriggered(false);
     speechService.resetMilestones();
     setCurrentLocation({ latitude: 12.9784, longitude: 77.6408 });
   };
@@ -393,7 +464,7 @@ export default function App() {
         {/* Interstitial Ad Popup Modal */}
         <InterstitialAdModal />
 
-        {/* Emergency Full-Screen Wake-up Alarm */}
+        {/* Emergency Full-Screen Wake-up Alarm & Post-Trip Relief Summary */}
         <AlarmTriggerModal
           visible={alarmStatus === 'TRIGGERED'}
           destinationName={destinationName}
@@ -401,6 +472,7 @@ export default function App() {
           radiusKm={radiusKm}
           onDismiss={handleAlarmDismiss}
           onSnooze={handleAlarmSnooze}
+          onOpenPrime={() => setPrimeModalVisible(true)}
         />
 
         <ScrollView
@@ -458,8 +530,11 @@ export default function App() {
             </View>
           </View>
 
-          {/* 1-Tap Home <-> Work Route Preset Flip */}
-          <RouteFlipBar onRouteSelected={handleRouteSelected} />
+          {/* 1-Tap Home <-> Work Route Preset Flip with Multi-Leg Interchange */}
+          <RouteFlipBar
+            onRouteSelected={handleRouteSelected}
+            onOpenPrime={() => setPrimeModalVisible(true)}
+          />
 
           {/* Underground Metro Tunnel Offline Mode Indicator */}
           {isOffline && (
@@ -499,6 +574,15 @@ export default function App() {
                   </Text>
                 </View>
               </View>
+
+              {/* Multi-Leg Interchange Indicator */}
+              {transferStation && !transferAlertTriggered && (
+                <View style={styles.multiLegBadge}>
+                  <Text style={styles.multiLegBadgeText}>
+                    Leg 1: Next stop {transferStation.name} (Interchange in {formatDistance(transferDistanceKm)})
+                  </Text>
+                </View>
+              )}
 
               {/* Destination Name */}
               <Text style={styles.deliveryHeading}>
@@ -546,11 +630,25 @@ export default function App() {
                   </Text>
                 </View>
               </View>
+
+              {/* 1-Tap WhatsApp Peace of Mind Arrival Share */}
+              <TouchableOpacity
+                style={styles.whatsAppCommuteBtn}
+                onPress={handleShareWhatsApp}
+                accessibilityRole="button"
+                accessibilityLabel="Share live arrival status on WhatsApp"
+              >
+                <View style={styles.whatsAppDot} />
+                <Text style={styles.whatsAppCommuteBtnText}>Share live ETA on WhatsApp</Text>
+              </TouchableOpacity>
             </View>
           )}
 
-          {/* Search for Destination */}
-          <SearchBar onSelectPlace={handleSelectPlace} />
+          {/* Search for Destination & Desktop Route Sync */}
+          <SearchBar
+            onSelectPlace={handleSelectPlace}
+            onSyncRoute={handleSyncRoute}
+          />
 
           {/* Map & Geofence Display */}
           <MapPicker

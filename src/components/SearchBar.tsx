@@ -7,23 +7,30 @@ import {
   FlatList,
   StyleSheet,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { searchPlaces, SearchResult } from '../services/nominatim';
 import { SWIGGY_THEME } from '../theme/swiggyTheme';
+import { decodeRouteFromSync, RouteSyncPayload } from '../utils/routeSync';
 
 interface SearchBarProps {
   onSelectPlace: (result: SearchResult) => void;
+  onSyncRoute?: (payload: RouteSyncPayload) => void;
   placeholder?: string;
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
   onSelectPlace,
-  placeholder = 'Search for station, stop, or destination...',
+  onSyncRoute,
+  placeholder = 'Search station or stop...',
 }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [syncModalVisible, setSyncModalVisible] = useState(false);
+  const [syncTokenInput, setSyncTokenInput] = useState('');
+  const [syncError, setSyncError] = useState<string | null>(null);
   const lastRequestIdRef = React.useRef(0);
 
   useEffect(() => {
@@ -37,7 +44,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     const timer = setTimeout(async () => {
       setLoading(true);
       const res = await searchPlaces(query);
-      // Only commit if this is still the freshest request in flight
       if (currentRequestId === lastRequestIdRef.current) {
         setResults(res);
         setLoading(false);
@@ -59,6 +65,32 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     setResults([]);
   };
 
+  const handleImportSync = () => {
+    setSyncError(null);
+    if (!syncTokenInput.trim()) return;
+
+    const payload = decodeRouteFromSync(syncTokenInput);
+    if (payload) {
+      if (onSyncRoute) {
+        onSyncRoute(payload);
+      } else {
+        onSelectPlace({
+          placeId: `sync_${Date.now()}`,
+          name: payload.destinationName,
+          displayName: payload.destinationName,
+          latitude: payload.destination.latitude,
+          longitude: payload.destination.longitude,
+          type: 'transit_station',
+        });
+      }
+      setQuery(payload.destinationName);
+      setSyncModalVisible(false);
+      setSyncTokenInput('');
+    } else {
+      setSyncError('Invalid route code or token. Please check the desktop link.');
+    }
+  };
+
   return (
     <View
       style={styles.container}
@@ -68,13 +100,21 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     >
       <View style={styles.topLabelRow}>
         <Text style={styles.topLabelTitle}>Destination station</Text>
+        <TouchableOpacity
+          style={styles.desktopSyncBtn}
+          onPress={() => setSyncModalVisible(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Sync route from desktop"
+        >
+          <Text style={styles.desktopSyncBtnText}>Sync from desktop</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={[styles.inputRow, isFocused && styles.inputFocused]}>
         <Text style={styles.searchIcon} importantForAccessibility="no">⌕</Text>
         <TextInput
           style={styles.input}
-          placeholder="Search station or stop"
+          placeholder={placeholder}
           placeholderTextColor="#94A3B8"
           value={query}
           onChangeText={setQuery}
@@ -134,6 +174,56 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           />
         </View>
       )}
+
+      {/* Desktop Route Sync Modal */}
+      <Modal
+        visible={syncModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setSyncModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Desktop route sync</Text>
+            <Text style={styles.modalSubtitle}>
+              Paste a route code or link generated from your office desktop to beam your journey instantly without logging in.
+            </Text>
+
+            <TextInput
+              style={styles.syncInput}
+              placeholder="Paste sync code or URL (e.g. #sync=...)"
+              placeholderTextColor="#94A3B8"
+              value={syncTokenInput}
+              onChangeText={setSyncTokenInput}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+
+            {syncError && (
+              <Text style={styles.errorText}>{syncError}</Text>
+            )}
+
+            <View style={styles.modalBtnRow}>
+              <TouchableOpacity
+                style={styles.modalCancelBtn}
+                onPress={() => {
+                  setSyncModalVisible(false);
+                  setSyncError(null);
+                }}
+              >
+                <Text style={styles.modalCancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.modalConfirmBtn}
+                onPress={handleImportSync}
+              >
+                <Text style={styles.modalConfirmBtnText}>Import route</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -146,19 +236,29 @@ const styles = StyleSheet.create({
   },
   topLabelRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 6,
     paddingHorizontal: 2,
-  },
-  topLabelIcon: {
-    fontSize: 14,
-    marginRight: 4,
   },
   topLabelTitle: {
     color: SWIGGY_THEME.colors.textSecondary,
     fontSize: 12,
     fontWeight: '600',
     letterSpacing: -0.1,
+  },
+  desktopSyncBtn: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  desktopSyncBtnText: {
+    color: '#0F172A',
+    fontSize: 11,
+    fontWeight: '600',
   },
   inputRow: {
     flexDirection: 'row',
@@ -274,6 +374,77 @@ const styles = StyleSheet.create({
   selectBadgeText: {
     color: SWIGGY_THEME.colors.textPrimary,
     fontSize: 11,
+    fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    width: '100%',
+    maxWidth: 400,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0F172A',
+    marginBottom: 4,
+  },
+  modalSubtitle: {
+    fontSize: 12,
+    color: '#64748B',
+    lineHeight: 16,
+    marginBottom: 14,
+  },
+  syncInput: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 13,
+    color: '#0F172A',
+    marginBottom: 10,
+  },
+  errorText: {
+    color: '#DC2626',
+    fontSize: 11.5,
+    marginBottom: 10,
+  },
+  modalBtnRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 8,
+  },
+  modalCancelBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+    backgroundColor: '#F1F5F9',
+  },
+  modalCancelBtnText: {
+    color: '#64748B',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  modalConfirmBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 6,
+    backgroundColor: '#0F172A',
+  },
+  modalConfirmBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
     fontWeight: '600',
   },
 });
