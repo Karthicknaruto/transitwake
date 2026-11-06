@@ -1,7 +1,8 @@
 name,type,url,location_or_channel,price_of_comparable_item,what_it_sells,positioning_line,rating,review_count,source_date
-Naplarm,Direct,https://play.google.com/store/apps/details?id=com.pradhan.naplarm,Google Play & iOS,Free with ads / $2.99 ad-free,GPS location-based alarm,Never miss your stop again,4.2,15000,2026-11-01
+Naplarm,Direct,https://play.google.com/store/apps/details?id=com.pradhan.naplarm,Google Play & App Store,Free with ads / $2.99 ad-free,GPS location-based alarm,Never miss your stop again,4.2,15000,2026-11-01
 Wake Me Here,Direct,https://play.google.com/store/apps/details?id=com.wakemehere,Google Play & App Store,Free with ads / $1.99 in-app,GPS destination wake alarm,GPS alarm that wakes you at your stop,3.9,6400,2026-10-15
+Moovit,Indirect,https://moovitapp.com,Google Play & App Store,Free with ads / $1.99/mo Moovit+,Urban mobility app with live get-off alerts,Your local transit guide,4.4,1200000,2026-10-25
 Citymapper,Indirect,https://citymapper.com,Global App Store & Play Store,$4.99/mo ($39.99/yr) CLUB,Urban transit trip planner with get-off alerts,The ultimate transit app,4.7,280000,2026-10-20
 Transit App,Indirect,https://transitapp.com,Global App Store & Play Store,$4.99/mo ($24.99/yr) Royale,Public transit tracker with push alerts,Your real-time transit companion,4.6,180000,2026-10-01
 Google Maps,Substitute,https://maps.google.com,Pre-installed iOS & Android,Free (ad/data monetization),Turn-by-turn navigation with transit alerts,Navigate your world faster and easier,4.3,18000000,2026-11-01
-Phone Clock Alarm,Substitute,Built-in OS utility,Device Clock,Free,Static time-based alarm,Alarm and timer clock,N/A,N/A,2026-11-01
+Phone Clock Alarm,Substitute,https://support.apple.com/guide/iphone/set-an-alarm-iph2909d3174/ios,Built-in device clock,Free,Static time-based alarm,Alarm and timer clock,N/A,N/A,2026-11-01
