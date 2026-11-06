@@ -1,13 +1,13 @@
 {
   "id": "P083",
-  "buys": false,
-  "purchases_first_month": 0,
-  "reason_code": "habit",
-  "reason": "I currently use my phone clock timer; I'll use the free tier before committing to a monthly sub.",
+  "buys": true,
+  "purchases_first_month": 1,
+  "reason_code": "convenience",
+  "reason": "Being able to send my spouse a 1-tap WhatsApp ETA while my phone monitors my stop offline is brilliant. Instant subscribe.",
   "objection": "What if my phone's aggressive battery saver or Doze mode kills the app in the background?",
-  "would_change_my_mind": "Direct integration with metro live delay alerts.",
+  "would_change_my_mind": "",
   "price_too_cheap": 10,
-  "price_cheap": 20,
-  "price_expensive": 75,
-  "price_too_expensive": 149
+  "price_cheap": 15,
+  "price_expensive": 50,
+  "price_too_expensive": 299
 }

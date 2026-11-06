@@ -3,10 +3,10 @@
   "buys": true,
   "purchases_first_month": 1,
   "reason_code": "convenience",
-  "reason": "After a 12-hour hospital shift, I desperately need to sleep on the train. ₹26 a month to guarantee no ads and loud sirens is an absolute no-brainer.",
+  "reason": "The multi-leg interchange alert alone is worth double the price. I can sleep through my first train and wake up before the junction.",
   "objection": "Will this app drain my remaining phone battery on the 60-minute ride home?",
-  "would_change_my_mind": "Immediate buy.",
-  "price_too_cheap": 10,
+  "would_change_my_mind": "",
+  "price_too_cheap": 5,
   "price_cheap": 25,
   "price_expensive": 99,
   "price_too_expensive": 149

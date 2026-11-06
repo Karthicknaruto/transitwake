@@ -4,9 +4,9 @@
  "dealt": 100,
  "answered": 100,
  "skipped": [],
- "buys": 47,
- "passes": 53,
- "buy_rate": 0.47,
+ "buys": 66,
+ "passes": 34,
+ "buy_rate": 0.66,
  "by_segment": [
   [
    "Night Shift / Hospital Worker",
@@ -16,212 +16,157 @@
   [
    "Daily Office Commuter",
    50,
-   0.46
+   0.66
   ],
   [
    "University Student",
    30,
-   0.2
+   0.5
   ]
  ],
  "by_behaviour": [
   [
-   "Daily Nap Habit",
-   35,
-   0.7142857142857143
+   "Battery Anxious Rider",
+   25,
+   0.76
   ],
   [
    "Privacy Conscious User",
    10,
-   0.5
+   0.7
   ],
   [
    "One-Hand Multitasker",
    10,
-   0.4
+   0.7
   ],
   [
-   "Battery Anxious Rider",
-   25,
-   0.36
+   "Daily Nap Habit",
+   35,
+   0.6857142857142857
   ],
   [
    "Price Sensitive / Deal Hunter",
    20,
-   0.2
+   0.45
   ]
  ],
  "by_income": [
   [
    "$25,000 to $58,000",
    33,
-   0.6666666666666666
+   0.8181818181818182
   ],
   [
    "$58,000 and up",
    34,
-   0.47058823529411764
+   0.6470588235294118
   ],
   [
    "under $25,000",
    33,
-   0.2727272727272727
+   0.5151515151515151
   ]
  ],
  "why_not": [
   [
-   "price",
-   24,
+   "need",
+   17,
    [
-    "As a college student, every rupee counts. The free version does everything I need for class commutes.",
-    "I don't mind banner ads at the bottom if the alarm itself is 100% free."
+    "The free tier is already great, so I will test it for a week before upgrading to Prime.",
+    "The free tier is already great, so I will test it for a week before upgrading to Prime."
    ],
    [
-    "P005",
-    "P006"
+    "P002",
+    "P009"
+   ]
+  ],
+  [
+   "price",
+   15,
+   [
+    "I will invite two classmates to unlock the free semester pass instead of paying directly.",
+    "I will invite two classmates to unlock the free semester pass instead of paying directly."
+   ],
+   [
+    "P010",
+    "P013"
    ]
   ],
   [
    "habit",
-   16,
+   2,
    [
-    "I currently use my phone clock timer; I'll use the free tier before committing to a monthly sub.",
-    "I currently use my phone clock timer; I'll use the free tier before committing to a monthly sub."
+    "I only take one single bus line and don't need transfer alerts.",
+    "I only take one single bus line and don't need transfer alerts."
    ],
    [
-    "P012",
-    "P017"
-   ]
-  ],
-  [
-   "need",
-   10,
-   [
-    "I love the battery saving feature, but since the core alarm is free, I'll test it out first before paying for Prime.",
-    "I love the battery saving feature, but since the core alarm is free, I'll test it out first before paying for Prime."
-   ],
-   [
-    "P021",
-    "P030"
-   ]
-  ],
-  [
-   "trust",
-   3,
-   [
-    "I prefer not to enter any payment info unless I have verified zero telemetry over a few weeks.",
-    "I prefer not to enter any payment info unless I have verified zero telemetry over a few weeks."
-   ],
-   [
-    "P042",
-    "P077"
+    "P029",
+    "P074"
    ]
   ]
  ],
  "why_yes": [
   [
    "convenience",
-   36,
+   51,
    [
-    "I commute 80 minutes on the Western line every day and nod off instantly. ₹26 is nothing for guaranteed peace of mind.",
-    "After a 12-hour hospital shift, I desperately need to sleep on the train. ₹26 a month to guarantee no ads and loud sirens is an absolute no-brainer."
+    "Being able to send my spouse a 1-tap WhatsApp ETA while my phone monitors my stop offline is brilliant. Instant subscribe.",
+    "The multi-leg interchange alert alone is worth double the price. I can sleep through my first train and wake up before the junction."
    ],
    [
-    "P002",
+    "P001",
     "P003"
    ]
   ],
   [
    "price",
-   6,
+   15,
    [
-    "₹26/month is cheap enough even for my student budget to get rid of banner ads while listening to study lectures.",
-    "₹26/month is cheap enough even for my student budget to get rid of banner ads while listening to study lectures."
+    "At ₹26/month with the student referral pass, my roommate and I both get it. Perfect for commuting to college.",
+    "At ₹26/month with the student referral pass, my roommate and I both get it. Perfect for commuting to college."
    ],
    [
-    "P033",
-    "P047"
-   ]
-  ],
-  [
-   "quality",
-   3,
-   [
-    "The 78% battery savings plus offline subway mode is huge for my commute from Whitefield. Happy to pay ₹26 to support and go ad-free.",
-    "The 78% battery savings plus offline subway mode is huge for my commute from Whitefield. Happy to pay ₹26 to support and go ad-free."
-   ],
-   [
-    "P001",
-    "P061"
-   ]
-  ],
-  [
-   "values",
-   2,
-   [
-    "I respect that there is no account required and GPS stays in RAM. I will pay ₹26 to keep it ad-free and privacy-focused.",
-    "I respect that there is no account required and GPS stays in RAM. I will pay ₹26 to keep it ad-free and privacy-focused."
-   ],
-   [
-    "P028",
-    "P095"
+    "P005",
+    "P006"
    ]
   ]
  ],
  "flip": [
-  "Student discount at ₹15/month or annual pass at ₹199.",
-  "Free semester referral unlock.",
-  "Free semester referral unlock.",
-  "Free semester referral unlock.",
-  "Free semester referral unlock.",
-  "Direct integration with metro live delay alerts.",
-  "Student discount at ₹15/month or annual pass at ₹199.",
-  "Free semester referral unlock.",
-  "Free semester referral unlock.",
-  "Direct integration with metro live delay alerts.",
-  "Free semester referral unlock.",
-  "A 3-month bundle with multi-leg transfer alarms.",
-  "Direct integration with metro live delay alerts.",
-  "A 3-month bundle with multi-leg transfer alarms.",
-  "A 3-month bundle with multi-leg transfer alarms.",
-  "Free semester referral unlock.",
-  "Free semester referral unlock.",
-  "If ads interrupt my alarms or audio.",
-  "Student discount at ₹15/month or annual pass at ₹199.",
-  "Direct integration with metro live delay alerts.",
-  "Direct integration with metro live delay alerts.",
-  "Third-party privacy audit badge.",
-  "Direct integration with metro live delay alerts.",
-  "Free semester referral unlock.",
-  "Free semester referral unlock.",
-  "A 3-month bundle with multi-leg transfer alarms.",
-  "If ads interrupt my alarms or audio.",
-  "Direct integration with metro live delay alerts.",
-  "Direct integration with metro live delay alerts.",
-  "Student discount at ₹15/month or annual pass at ₹199.",
-  "Direct integration with metro live delay alerts.",
-  "Student discount at ₹15/month or annual pass at ₹199.",
-  "A 3-month bundle with multi-leg transfer alarms.",
-  "Free semester referral unlock.",
-  "Direct integration with metro live delay alerts.",
-  "Free semester referral unlock.",
-  "A 3-month bundle with multi-leg transfer alarms.",
-  "Free semester referral unlock.",
-  "Third-party privacy audit badge.",
-  "Free semester referral unlock.",
-  "Free semester referral unlock.",
-  "Free semester referral unlock.",
-  "A 3-month bundle with multi-leg transfer alarms.",
-  "Direct integration with metro live delay alerts.",
-  "Direct integration with metro live delay alerts.",
-  "Free semester referral unlock.",
-  "Free semester referral unlock.",
-  "Third-party privacy audit badge.",
-  "A 3-month bundle with multi-leg transfer alarms.",
-  "Direct integration with metro live delay alerts.",
-  "Direct integration with metro live delay alerts.",
-  "Direct integration with metro live delay alerts.",
-  "Direct integration with metro live delay alerts."
+  "Desktop web route sync.",
+  "Desktop web route sync.",
+  "Pre-paid college transit card tie-in.",
+  "Desktop web route sync.",
+  "Pre-paid college transit card tie-in.",
+  "Pre-paid college transit card tie-in.",
+  "Desktop web route sync.",
+  "Desktop web route sync.",
+  "Desktop web route sync.",
+  "Direct bus route live timings.",
+  "Desktop web route sync.",
+  "Pre-paid college transit card tie-in.",
+  "Pre-paid college transit card tie-in.",
+  "Desktop web route sync.",
+  "Pre-paid college transit card tie-in.",
+  "Pre-paid college transit card tie-in.",
+  "Pre-paid college transit card tie-in.",
+  "Pre-paid college transit card tie-in.",
+  "Pre-paid college transit card tie-in.",
+  "Desktop web route sync.",
+  "Pre-paid college transit card tie-in.",
+  "Desktop web route sync.",
+  "Pre-paid college transit card tie-in.",
+  "Desktop web route sync.",
+  "Desktop web route sync.",
+  "Direct bus route live timings.",
+  "Pre-paid college transit card tie-in.",
+  "Desktop web route sync.",
+  "Pre-paid college transit card tie-in.",
+  "Desktop web route sync.",
+  "Pre-paid college transit card tie-in.",
+  "Desktop web route sync.",
+  "Desktop web route sync.",
+  "Desktop web route sync."
  ],
  "purchases_first_month_per_buyer": 1.0,
  "price_answers": 100

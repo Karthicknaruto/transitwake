@@ -1,13 +1,13 @@
 {
   "id": "P032",
-  "buys": true,
-  "purchases_first_month": 1,
-  "reason_code": "convenience",
-  "reason": "One tap to dismiss without ads in my face is worth ₹26.",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "The free tier is already great, so I will test it for a week before upgrading to Prime.",
   "objection": "What if my phone's aggressive battery saver or Doze mode kills the app in the background?",
-  "would_change_my_mind": "",
+  "would_change_my_mind": "Desktop web route sync.",
   "price_too_cheap": 5,
-  "price_cheap": 25,
-  "price_expensive": 75,
-  "price_too_expensive": 149
+  "price_cheap": 15,
+  "price_expensive": 99,
+  "price_too_expensive": 199
 }

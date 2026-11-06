@@ -1,0 +1,47 @@
+{
+  "business": "TransitWake",
+  "unit": "subscriber-month",
+  "price": 26.0,
+  "variable": [
+    {
+      "label": "App Store / Play Store fee (15% small developer)",
+      "cost": 3.90
+    },
+    {
+      "label": "Map tile CDN bandwidth & server caching",
+      "cost": 0.80
+    },
+    {
+      "label": "WhatsApp / notification relay webhook",
+      "cost": 0.50
+    }
+  ],
+  "fixed_monthly": [
+    {
+      "label": "High-availability Nominatim & tile proxy VPS",
+      "cost": 3000
+    },
+    {
+      "label": "Domain, SSL, crash analytics & monitoring",
+      "cost": 1500
+    }
+  ],
+  "startup": [
+    {
+      "label": "Apple Developer Program (annual)",
+      "cost": 8300
+    },
+    {
+      "label": "Google Play Developer Account (one-off)",
+      "cost": 2100
+    },
+    {
+      "label": "Domain registration (transitwake.app)",
+      "cost": 1600
+    }
+  ],
+  "days_per_month": 30,
+  "capacity_per_day": 10000,
+  "plan_per_day": 350,
+  "ramp_per_day": [25, 50, 85, 120, 160, 200, 240, 275, 305, 330, 345, 350]
+}

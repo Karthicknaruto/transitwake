@@ -2,12 +2,12 @@
   "id": "P062",
   "buys": true,
   "purchases_first_month": 1,
-  "reason_code": "quality",
-  "reason": "The 78% battery savings plus offline subway mode is huge for my commute from Whitefield. Happy to pay ₹26 to support and go ad-free.",
+  "reason_code": "convenience",
+  "reason": "Being able to send my spouse a 1-tap WhatsApp ETA while my phone monitors my stop offline is brilliant. Instant subscribe.",
   "objection": "What if my phone's aggressive battery saver or Doze mode kills the app in the background?",
   "would_change_my_mind": "",
   "price_too_cheap": 5,
-  "price_cheap": 15,
+  "price_cheap": 26,
   "price_expensive": 99,
-  "price_too_expensive": 149
+  "price_too_expensive": 299
 }

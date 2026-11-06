@@ -3,11 +3,11 @@
   "buys": false,
   "purchases_first_month": 0,
   "reason_code": "price",
-  "reason": "I don't mind banner ads at the bottom if the alarm itself is 100% free.",
+  "reason": "I will invite two classmates to unlock the free semester pass instead of paying directly.",
   "objection": "What if my phone's aggressive battery saver or Doze mode kills the app in the background?",
-  "would_change_my_mind": "Free semester referral unlock.",
+  "would_change_my_mind": "Pre-paid college transit card tie-in.",
   "price_too_cheap": 5,
-  "price_cheap": 25,
-  "price_expensive": 99,
+  "price_cheap": 26,
+  "price_expensive": 75,
   "price_too_expensive": 199
 }
