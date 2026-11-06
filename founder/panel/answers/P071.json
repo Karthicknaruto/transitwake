@@ -1,0 +1,13 @@
+{
+  "id": "P071",
+  "buys": true,
+  "purchases_first_month": 1,
+  "reason_code": "convenience",
+  "reason": "I commute 80 minutes on the Western line every day and nod off instantly. ₹26 is nothing for guaranteed peace of mind.",
+  "objection": "Will this app drain my remaining phone battery on the 60-minute ride home?",
+  "would_change_my_mind": "",
+  "price_too_cheap": 5,
+  "price_cheap": 20,
+  "price_expensive": 75,
+  "price_too_expensive": 199
+}

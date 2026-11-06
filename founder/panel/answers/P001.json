@@ -1,0 +1,13 @@
+{
+  "id": "P001",
+  "buys": true,
+  "purchases_first_month": 1,
+  "reason_code": "quality",
+  "reason": "The 78% battery savings plus offline subway mode is huge for my commute from Whitefield. Happy to pay ₹26 to support and go ad-free.",
+  "objection": "Why should I pay ₹26 per month if the core alarm is already free?",
+  "would_change_my_mind": "",
+  "price_too_cheap": 5,
+  "price_cheap": 15,
+  "price_expensive": 99,
+  "price_too_expensive": 199
+}

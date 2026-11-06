@@ -1,0 +1,13 @@
+{
+  "id": "P006",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "I don't mind banner ads at the bottom if the alarm itself is 100% free.",
+  "objection": "Will this app drain my remaining phone battery on the 60-minute ride home?",
+  "would_change_my_mind": "Free semester referral unlock.",
+  "price_too_cheap": 10,
+  "price_cheap": 20,
+  "price_expensive": 75,
+  "price_too_expensive": 299
+}

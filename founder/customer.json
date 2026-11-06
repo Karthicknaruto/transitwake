@@ -1,0 +1,65 @@
+{
+  "business": "TransitWake",
+  "target": "Daily public transit commuters who want to sleep or read on train, bus, or subway rides without fear of missing their stop",
+  "segments": [
+    {
+      "name": "Daily Office Commuter",
+      "share": 0.50,
+      "income": [25000, 120000],
+      "context": "Commutes 45-90 minutes each way on crowded suburban trains or metro lines. Extremely tired on the evening journey."
+    },
+    {
+      "name": "University Student",
+      "share": 0.30,
+      "income": [5000, 25000],
+      "context": "Budget conscious, listens to music or study materials on earphones, travels cross-city daily on metro or bus."
+    },
+    {
+      "name": "Night Shift / Hospital Worker",
+      "share": 0.20,
+      "income": [15000, 60000],
+      "context": "Exhausted after 10-12 hour overnight shift, high risk of sleeping past terminal station into rail yards."
+    }
+  ],
+  "behaviours": [
+    {
+      "name": "Daily Nap Habit",
+      "share": 0.35,
+      "how": "Routinely closes eyes the moment they find a seat; terrified of oversleeping past their interchange station."
+    },
+    {
+      "name": "Battery Anxious Rider",
+      "share": 0.25,
+      "how": "Carries 15-30% battery remaining on the ride home; immediately uninstalls apps that drain >5% battery."
+    },
+    {
+      "name": "Price Sensitive / Deal Hunter",
+      "share": 0.20,
+      "how": "Never pays $5/mo for Western apps like Citymapper; will consider micro-payments under ₹30 if clearly justified."
+    },
+    {
+      "name": "Privacy Conscious User",
+      "share": 0.10,
+      "how": "Refuses apps requiring account login, phone number, or persistent coordinate tracking history."
+    },
+    {
+      "name": "One-Hand Multitasker",
+      "share": 0.10,
+      "how": "Holds overhead rail strap with one hand while browsing news or reading on their phone with the other."
+    }
+  ],
+  "objections": [
+    "Will this app drain my remaining phone battery on the 60-minute ride home?",
+    "Does it fail or lose tracking when the subway goes into underground tunnels?",
+    "Will loud ads pop up on my screen while I'm disoriented and trying to shut off the alarm?",
+    "What if my phone's aggressive battery saver or Doze mode kills the app in the background?",
+    "Why should I pay ₹26 per month if the core alarm is already free?"
+  ],
+  "habits": [
+    "Wears Bluetooth earphones playing podcasts or lofi music during transit.",
+    "Sets static phone alarms that fail whenever the train is delayed by signal halts.",
+    "Wakes up every 5 minutes in a panic to check station boards out the train window.",
+    "Holds onto grab bars with one hand, operating their smartphone single-thumbed.",
+    "Has at least once in their life woken up at the end-of-line terminus station in a panic."
+  ]
+}
