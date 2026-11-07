@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { formatDistance } from '../utils/geo';
 import { generateWhatsAppEtaUrl } from '../utils/routeSync';
+import { rateLimiter } from '../utils/rateLimiter';
 
 interface FloatingTransitHudProps {
   destinationName: string;
@@ -55,6 +56,10 @@ export const FloatingTransitHud: React.FC<FloatingTransitHudProps> = ({
   ).current;
 
   const handleShareWhatsApp = () => {
+    const rateCheck = rateLimiter.checkLimit('whatsapp_share_eta', 10, 60000);
+    if (!rateCheck.allowed) {
+      return;
+    }
     const url = generateWhatsAppEtaUrl({
       destinationName,
       distanceKm,

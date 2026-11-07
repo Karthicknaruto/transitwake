@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { subscriptionService } from '../services/subscriptionService';
 import { PrimeSubscriptionState, StudentReferralState } from '../types/subscription';
+import { rateLimiter } from '../utils/rateLimiter';
 
 interface PrimeModalProps {
   visible: boolean;
@@ -105,6 +106,11 @@ export const PrimeModal: React.FC<PrimeModalProps> = ({ visible, onClose }) => {
   };
 
   const handleShareReferral = () => {
+    const rateCheck = rateLimiter.checkLimit('whatsapp_share_referral', 6, 60000);
+    if (!rateCheck.allowed) {
+      setFeedbackMessage(`Sharing link rate limited. Please wait ${rateCheck.retryAfterSeconds} seconds.`);
+      return;
+    }
     const text = `Hey, use TransitWake for your train commute. Set alarms that wake you before your stop: https://transitwake.app/invite?code=${referralState.myReferralCode}`;
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
     Linking.openURL(url).catch(() => {});

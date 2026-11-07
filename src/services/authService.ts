@@ -76,8 +76,8 @@ class AuthService {
       'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=128&q=80';
 
     this.tokens = {
-      accessToken: `ya29.${Math.random().toString(36).substring(2, 18)}`,
-      idToken: `eyJhbGciOiJSUzI1Ni...mock_token`,
+      accessToken: `sandbox_access_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`,
+      idToken: `sandbox_jwt_${Date.now()}`,
       expiresAt: Date.now() + 3600 * 1000,
     };
 

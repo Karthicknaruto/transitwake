@@ -23,6 +23,7 @@ import {
   COMPLIANCE_CHECKLIST_20,
   LegalTabId,
 } from '../config/legalData';
+import { rateLimiter } from '../utils/rateLimiter';
 import { consentStore } from '../services/consentStore';
 import { subscriptionService } from '../services/subscriptionService';
 import { SWIGGY_THEME } from '../theme/swiggyTheme';
@@ -61,6 +62,14 @@ export function LegalModal({
   };
 
   const handleEmailDPO = () => {
+    const rateCheck = rateLimiter.checkLimit('legal_email_dpo', 3, 300000);
+    if (!rateCheck.allowed) {
+      Alert.alert(
+        'Request Rate Limit',
+        `Too many email requests sent. Please wait ${rateCheck.retryAfterSeconds} seconds before trying again.`
+      );
+      return;
+    }
     Linking.openURL(
       `mailto:${BUSINESS_DETAILS.dpoEmail}?subject=GDPR%20Data%20Deletion%20Request`
     ).catch(() => {});
@@ -309,6 +318,14 @@ export function LegalModal({
                 <TouchableOpacity
                   style={styles.unsubscribeBtn}
                   onPress={() => {
+                    const rateCheck = rateLimiter.checkLimit('legal_email_unsubscribe', 3, 300000);
+                    if (!rateCheck.allowed) {
+                      Alert.alert(
+                        'Request Rate Limit',
+                        `Too many unsubscribe requests sent. Please wait ${rateCheck.retryAfterSeconds} seconds.`
+                      );
+                      return;
+                    }
                     Linking.openURL(
                       `mailto:${BUSINESS_DETAILS.dpoEmail}?subject=Unsubscribe%20Request&body=Please%20unsubscribe%20my%20email%20from%20all%20correspondence.`
                     ).catch(() => {});

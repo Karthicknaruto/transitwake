@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import { CommutePreset, TransferInterchange } from '../types/routes';
+import { authService } from './authService';
 
 class RouteManager {
   private presets: CommutePreset[] = [];
@@ -9,6 +10,20 @@ class RouteManager {
   constructor() {
     this.presets = this.getDefaultPresets();
     this.loadPersistedPresets();
+  }
+
+  /**
+   * Heist 5 Defense: Check who owns it before update or delete.
+   * Throws an explicit authorization error if a user attempts to mutate
+   * or delete another commuter's preset.
+   */
+  private assertOwnership(preset: CommutePreset, action: string): void {
+    const currentUserId = authService.getCurrentUser().id;
+    if (preset.userId && preset.userId !== currentUserId) {
+      throw new Error(
+        `Access denied: Cannot ${action} preset belonging to user ${preset.userId} (current user: ${currentUserId})`
+      );
+    }
   }
 
   private getDefaultPresets(): CommutePreset[] {
@@ -95,6 +110,8 @@ class RouteManager {
       throw new Error('No active preset to flip');
     }
 
+    this.assertOwnership(current, 'flip');
+
     const flipped: CommutePreset = {
       ...current,
       originName: current.destinationName,
@@ -115,6 +132,8 @@ class RouteManager {
     const target = this.presets.find((p) => p.id === presetId);
     if (!target) return null;
 
+    this.assertOwnership(target, 'update');
+
     const updated: CommutePreset = {
       ...target,
       transfer,
@@ -127,17 +146,54 @@ class RouteManager {
   }
 
   public createPreset(data: Omit<CommutePreset, 'id' | 'direction' | 'lastUsedAt'>): CommutePreset {
+    const currentUserId = authService.getCurrentUser().id;
     const newPreset: CommutePreset = {
       ...data,
       id: `preset_${Math.random().toString(36).substring(2, 9)}`,
       direction: 'OUTBOUND',
       lastUsedAt: Date.now(),
+      userId: data.userId || currentUserId,
     };
 
     this.presets = [...this.presets, newPreset];
     this.activePresetId = newPreset.id;
     this.persistPresets();
     return { ...newPreset };
+  }
+
+  public updatePreset(presetId: string, updates: Partial<CommutePreset>): CommutePreset {
+    const target = this.presets.find((p) => p.id === presetId);
+    if (!target) {
+      throw new Error(`Commute preset not found: ${presetId}`);
+    }
+
+    this.assertOwnership(target, 'update');
+
+    const updated: CommutePreset = {
+      ...target,
+      ...updates,
+      id: target.id, // Prevent ID mutation
+      userId: target.userId, // Prevent ownership spoofing
+      lastUsedAt: Date.now(),
+    };
+
+    this.presets = this.presets.map((p) => (p.id === presetId ? updated : p));
+    this.persistPresets();
+    return { ...updated };
+  }
+
+  public deletePreset(presetId: string): boolean {
+    const target = this.presets.find((p) => p.id === presetId);
+    if (!target) return false;
+
+    this.assertOwnership(target, 'delete');
+
+    this.presets = this.presets.filter((p) => p.id !== presetId);
+    if (this.activePresetId === presetId) {
+      this.activePresetId = this.presets[0]?.id || '';
+    }
+    this.persistPresets();
+    return true;
   }
 
   public async resetForTesting(): Promise<void> {

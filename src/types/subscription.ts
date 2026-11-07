@@ -17,6 +17,8 @@ export interface PrimeSubscriptionState {
   expiresAt: number | null;
   autoRenew: boolean;
   transactionId: string | null;
+  receiptSignature?: string | null;
+  isVerified?: boolean;
 }
 
 export interface StudentReferralState {

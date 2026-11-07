@@ -19,4 +19,5 @@ export interface CommutePreset {
   direction: 'OUTBOUND' | 'RETURN';
   lastUsedAt: number;
   transfer?: TransferInterchange;
+  userId?: string;
 }
