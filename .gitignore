@@ -2,6 +2,9 @@
 
 # dependencies
 node_modules/
+*.exe
+*.dll
+.agents/**/*.exe
 
 # Expo
 .expo/
